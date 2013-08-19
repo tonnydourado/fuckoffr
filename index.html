@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta charset="utf-8">
+        <title>Fuckoffr</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="">
+        <meta name="author" content="">
+
+        <!-- Le styles -->
+        <link href="css/bootstrap.css" rel="stylesheet">
+        <style>
+            html, body {
+                height: 80%;
+            }
+
+            body {
+                padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
+            }
+
+            /* Wrapper for page content to push down footer */
+            #wrap {
+                min-height: 100%;
+                /*height: auto !important;*/
+                /* Negative indent footer by it's height */
+                margin: 0 auto 0;
+            }
+
+            /* Set the fixed height of the footer here */
+            #footer {
+                height: 60px;
+                text-align: center;
+            }
+        </style>
+        <link href="css/bootstrap-responsive.css" rel="stylesheet">
+
+        <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+        <!--[if lt IE 9]>
+          <script src="../assets/js/html5shiv.js"></script>
+        <![endif]-->
+        <style type="text/css">
+            .preview {
+                display: none;
+            }
+        </style>
+  </head>
+  <body>
+    <div class="navbar navbar-inverse navbar-fixed-top">
+        <div class="navbar-inner">
+            <div class="container">
+                <a class="brand" href="#">Fuckofr</a>
+                <div class="nav-collapse collapse">
+                    <ul class="nav">
+                    </ul>
+                </div><!--/.nav-collapse -->
+            </div>
+        </div>
+    </div>
+    <div id="wrap">
+        <div class="container">
+            <div class="row span6 offset2">
+                <form id="fuckoff-form" class="form-horizontal">
+                    <div class="control-group">
+                        <label class="control-label" for="fuckoffoperations">Choose how to tell it ...</label>
+                            <div class="controls">
+                                <select class="span3" id="fuckoffoperations">
+                                    <option selected disabled value=""></option>
+                                </select>
+                            </div>
+                    </div>
+                    <div class="control-group">
+                        <div class="controls">
+                            <button id="tellit" class="btn" type="button">And tell it!</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="preview span10 offset1">
+                <p>Link to send: <a id="link"></a></p>
+                <div class="hero-unit">
+                    <h1></h1>
+                    <p><em></em></p>
+                </div>
+            </div>
+            <div id="loading" class="span12 text-center" style="display: none;">
+                <img src="img/loading.gif" alt="Carregando ...">
+            </div>
+        </div> <!-- /container -->
+    </div>
+    <div id="footer">
+        <hr>
+        <p>
+            <a href="https://github.com/tonnynerd">© Antonio Dourado</a>
+            - powered by <a href="http://foaas.herokuapp.com/">FOAAS</a>
+            - <a href="https://github.com/tonnynerd/fuckoffr">Contribua!</a>
+        </p>
+    </div>
+
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script src="js/bootstrap.js"></script>
+    <script type="text/javascript">
+        function new_control_group (field_name, field_id) {
+            return $("<div></div>")
+            .addClass("control-group")
+            .addClass("dynamic-field")
+            .css("display", "none")
+            .append(
+                $("<label></label>")
+                .addClass("control-label")
+                .attr("for", field_id)
+                .text(field_name)
+            ).append(
+                $("<div></div>")
+                .addClass("controls")
+                .append(
+                    $("<input>")
+                    .addClass("span3")
+                    .attr("id", field_id)
+                )
+            );
+        }
+
+        function load_operations(operations, operations_selectbox) {
+            for (var i = 0; i < operations.length; i++) {
+                var option = $("<option></option>")
+                             .text(operations[i].name)
+                             .val(operations[i].url);
+
+                option.prop("data-fields", operations[i].fields);
+                operations_selectbox.append(option);
+            }
+            $("#loading").hide();
+        }
+
+        $(document).ready(function () {
+            var fuckoff_url = "http://foaas.com";
+            var fuckoff_form = $("#fuckoff-form");
+            var operations_selectbox = $("#fuckoffoperations");
+            var missing_operations = [
+                {
+                    "name": "Rolling donut",
+                    "url": "/donut/:name/:from",
+                    "fields": [
+                        {
+                            "name": "Name",
+                            "field": "name"
+                        },
+                        {
+                            "name": "From",
+                            "field": "from"
+                        }
+                    ]
+                },
+                {
+                    "name": "Fascinating story",
+                    "url": "/fascinating/:from",
+                    "fields": [
+                        {
+                            "name": "From",
+                            "field": "from"
+                        }
+                    ]
+                }
+            ]
+
+            // Retrieving the possible fuck off forms:
+            $("#loading").show();
+            $.get(fuckoff_url + "/operations", function (data) {
+                load_operations(data, operations_selectbox);
+                load_operations(missing_operations, operations_selectbox)
+            });
+
+            operations_selectbox.on("change", function () {
+                var $this = $(this);
+                var last_control_group = fuckoff_form.find("div.control-group:nth-last-child(1)");
+                var fields = $this.find("option[value='" + $this.val() + "']").prop("data-fields");
+
+                fuckoff_form.find(".dynamic-field").fadeOut("slow").remove();
+                $(".preview").fadeOut("slow");
+
+                for (var i = 0; i < fields.length; i++) {
+                    last_control_group.before(
+                        new_control_group(fields[i].name, fields[i].field)
+                        .fadeIn("slow")
+                    );
+                }
+            });
+
+            $("#tellit").on("click", function () {
+                var option = operations_selectbox
+                             .find("option[value='" + operations_selectbox.val() + "']");
+                var url = option.val();
+                var fields = option.prop("data-fields");
+
+                for (var i = 0; i < fields.length; i++) {
+                    url = url.replace(":" + fields[i].field, $("#" + fields[i].field).val());
+                }
+
+                $("#loading").show();
+                $.get(fuckoff_url + url, function (result) {
+                    var preview_div = $(".preview");
+                    preview_div.find(".hero-unit h1").text(result.message);
+                    preview_div.find(".hero-unit p em").text(result.subtitle);
+                    preview_div.fadeIn("slow");
+                    
+                    preview_div
+                    .find("#link")
+                    .text(fuckoff_url + url)
+                    .attr("href", fuckoff_url + url)
+                    .fadeIn("slow");
+                    $("#loading").hide();
+                }, "json");
+
+            });
+        });
+
+    </script>
+</body>
+</html>

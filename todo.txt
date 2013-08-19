@@ -1,0 +1,5 @@
+Adicionar formas que não vem em /operations
+Botões para:
+	mandar link por email
+		ou no corpo do email?
+	tweetar como mention (@ na frente do name)
